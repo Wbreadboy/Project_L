@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="www.breadboy.com.lockerroom.AppListActivity"
+    tools:context="www.breadboy.com.lockerroom.applist.AppListActivity"
     tools:showIn="@layout/activity_app_list">
 
     <TextView
