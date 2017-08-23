@@ -9,7 +9,7 @@ import android.view.Menu
 import android.view.MenuItem
 import www.breadboy.com.lockerroom.R
 
-class AppListActivity : AppCompatActivity() {
+class AppListActivity : AppListContract.View() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,7 +19,7 @@ class AppListActivity : AppCompatActivity() {
 
         val fab = findViewById(R.id.fab) as FloatingActionButton
         fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_SHORT)
                     .setAction("Action", null).show()
         }
     }
@@ -41,5 +41,9 @@ class AppListActivity : AppCompatActivity() {
             true
         } else super.onOptionsItemSelected(item)
 
+    }
+
+    override fun setupActivityComponent() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }
