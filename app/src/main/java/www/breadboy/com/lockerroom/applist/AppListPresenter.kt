@@ -19,11 +19,12 @@ constructor(val appListActivity: AppListActivity) : BasePresenter {
 
     override fun start() {
         val appApplicationInfoList: MutableList<ApplicationInfo> =
-                //appListActivity.packageManager.queryIntentActivities(Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER), 0)
-                appListActivity.packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+                appListActivity.packageManager.getInstalledApplications(PackageManager.GET_ACTIVITIES)
 
         for (applicatoinInfo in appApplicationInfoList) {
-            appListActivity.appListAdapter.addApp(App(applicatoinInfo.packageName))
+            if (applicatoinInfo.packageName != null && applicatoinInfo.icon != 0) {
+                appListActivity.appListAdapter.addApp(App(applicatoinInfo.packageName, applicatoinInfo.icon))
+            }
         }
     }
 }
