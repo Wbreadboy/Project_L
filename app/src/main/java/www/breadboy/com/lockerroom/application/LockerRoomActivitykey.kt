@@ -11,4 +11,4 @@ import kotlin.reflect.KClass
 @MapKey
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class LockerRoomActivitykey(val value: KClass<out Activity>)
+annotation class LockerRoomActivityKey(val value: KClass<out Activity>)

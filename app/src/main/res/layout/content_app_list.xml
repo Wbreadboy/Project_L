@@ -8,10 +8,12 @@
     tools:context="www.breadboy.com.lockerroom.applist.AppListActivity"
     tools:showIn="@layout/activity_app_list">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerview_app_list_activity"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layoutManager="StaggeredGridLayoutManager"
+        app:spanCount="3"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

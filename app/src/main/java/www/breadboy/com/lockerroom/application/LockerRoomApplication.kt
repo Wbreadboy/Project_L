@@ -15,21 +15,23 @@ import javax.inject.Provider
 class LockerRoomApplication : Application(), WhichSubcomponentBuilders {
 
     @Inject
-    lateinit var lockerRoomComponentBuilders: Map<Class<out Activity>, Provider<ComponentBuilder<*, *>>>
+    lateinit var lockerRoomComponentBuilders: Map<Class<out Activity>, @JvmSuppressWildcards Provider<ComponentBuilder<*, *>>>
 
     override fun onCreate() {
         super.onCreate()
 
-        initLockerRoomModule()
+        setupLockerRoomModule()
     }
 
-    private fun initLockerRoomModule() {
+    private fun setupLockerRoomModule() {
         DaggerLockerRoomComponent.create().inject(this)
     }
 
     override fun getComponentBuilder(activity: Class<out Activity>) = lockerRoomComponentBuilders[activity]!!.get()
 
     companion object {
-        operator fun get(context: Context) = context.applicationContext as WhichSubcomponentBuilders
+        operator fun get(context: Context): WhichSubcomponentBuilders {
+            return context.applicationContext as WhichSubcomponentBuilders
+        }
     }
 }

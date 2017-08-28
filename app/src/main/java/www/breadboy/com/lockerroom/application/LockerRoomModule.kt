@@ -16,6 +16,6 @@ abstract class LockerRoomModule {
 
     @Binds
     @IntoMap
-    @LockerRoomActivitykey(AppListActivity::class)
+    @LockerRoomActivityKey(AppListActivity::class)
     abstract fun bindAppListActivity(impl: AppListComponent.Builder): ComponentBuilder<*, *>
 }
