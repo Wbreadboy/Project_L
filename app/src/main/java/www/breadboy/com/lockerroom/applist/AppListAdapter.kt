@@ -19,7 +19,6 @@ class AppListAdapter
 constructor(val appListActivity: AppListActivity): RecyclerView.Adapter<AppListViewHolder>() {
 
     private val mutableAppList: MutableList<App> = arrayListOf()
-    private val packageManager = appListActivity.packageManager
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int) =
             AppListViewHolder(LayoutInflater.from(parent?.context).inflate(R.layout.applist_cardview, parent, false))
@@ -27,17 +26,13 @@ constructor(val appListActivity: AppListActivity): RecyclerView.Adapter<AppListV
     override fun onBindViewHolder(holder: AppListViewHolder?, position: Int) {
         holder?.bind()
 
-        val appPackageName = mutableAppList[position].appPackageName
-
-        appListActivity.appListPresenter.getInstalledAppsByParts().subscribe()
-
         GlideApp.with(appListActivity)
-                .load("android.resource://$appPackageName/${mutableAppList[position].appIconId}")
+                .load("android.resource://${mutableAppList[position].appPackageName}/${mutableAppList[position].appIconId}")
                 .fitCenter()
                 .error(R.mipmap.ic_launcher)
                 .into(holder?.appIconImageView)
 
-        holder?.appNameTextView?.text = packageManager.getApplicationLabel(packageManager.getApplicationInfo(appPackageName, 0))
+        holder?.appNameTextView?.text = mutableAppList[position].appName
     }
 
     fun addApp(app: App) = mutableAppList.add(app)
