@@ -6,12 +6,15 @@ import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.StaggeredGridLayoutManager
 import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.content_app_list.*
 import www.breadboy.com.lockerroom.R
 import www.breadboy.com.lockerroom.application.LockerRoomApplication
+import www.breadboy.com.lockerroom.data.App
 import javax.inject.Inject
 
 class AppListActivity : AppListContract.View() {
@@ -23,7 +26,7 @@ class AppListActivity : AppListContract.View() {
     lateinit var appListAdapter: AppListAdapter
 
     @Inject
-    lateinit var appListStaggeredGridLayoutManager: LinearLayoutManager
+    lateinit var appListStaggeredGridLayoutManager: StaggeredGridLayoutManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,10 +85,12 @@ class AppListActivity : AppListContract.View() {
                 super.onScrolled(recyclerView, dx, dy)
 
                 var totalItemCount = appListStaggeredGridLayoutManager.itemCount
-                var lastVisibleItem = appListStaggeredGridLayoutManager.findLastVisibleItemPosition()
+                var lastVisibleItem = appListStaggeredGridLayoutManager.findLastVisibleItemPositions(null)[0]
 
-                if (totalItemCount <= lastVisibleItem + 15) {
-                    appListPresenter.getInstalledAppsByParts()
+                if (totalItemCount <= lastVisibleItem + 5) {
+                    Log.e("!!!!!!!!!!!!!!!!", "$totalItemCount            $lastVisibleItem")
+                    appListPresenter.getInstalledAppsByParts(appListPresenter.appListStartIdx).subscribe({ app -> appListAdapter.addApp(app) })
+                    appListPresenter.appListStartIdx += AppListPresenter.MAX_LOADING_APP_LEN
                 }
             }
         } )

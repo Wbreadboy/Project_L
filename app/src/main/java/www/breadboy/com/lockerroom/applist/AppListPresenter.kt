@@ -2,9 +2,7 @@ package www.breadboy.com.lockerroom.applist
 
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
-import io.reactivex.FlowableEmitter
 import www.breadboy.com.lockerroom.base.BasePresenter
 import www.breadboy.com.lockerroom.data.App
 import javax.inject.Inject
@@ -19,17 +17,24 @@ class AppListPresenter
 @Inject
 constructor(val appListActivity: AppListActivity) : BasePresenter {
 
-    override fun start() {
-        getInstalledAppsByParts().subscribe { app -> appListActivity.appListAdapter.addApps(app) }
+    val applicationInfoList = appListActivity.packageManager.getInstalledApplications(PackageManager.GET_ACTIVITIES)
+    var appListStartIdx = 0
+
+    companion object {
+        const val MAX_LOADING_APP_LEN = 10
     }
 
-    fun getInstalledAppsByParts() =
-            Flowable.create({ emitter: FlowableEmitter<App> ->
-                        val applicationInfoList = appListActivity.packageManager.getInstalledApplications(PackageManager.GET_ACTIVITIES)
 
-                        applicationInfoList
-                                .filter { !it.packageName.isNullOrBlank() && it.icon != 0 }
-                                .forEach { emitter.onNext(App(it.packageName, it.icon, appListActivity.packageManager.getApplicationLabel(it).toString())) }
-                    }, BackpressureStrategy.BUFFER)
 
+    override fun start() {
+        getInstalledAppsByParts(appListStartIdx).subscribe({ app -> appListActivity.appListAdapter.addApp(app) })
+    }
+
+    fun getInstalledAppsByParts(startIndex: Int): Flowable<App> =
+            Flowable.fromIterable(applicationInfoList)
+                    .filter { !it.packageName.isNullOrEmpty() && it.icon != 0 }
+                    .filter { applicationInfoList.indexOf(it) in startIndex until startIndex + MAX_LOADING_APP_LEN }
+                    .map({ appInfo: ApplicationInfo ->
+                        App(appInfo.packageName, appInfo.icon, appListActivity.packageManager.getApplicationLabel(appInfo).toString()) })
+    
 }
