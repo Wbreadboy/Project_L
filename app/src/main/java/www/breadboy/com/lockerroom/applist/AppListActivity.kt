@@ -5,6 +5,7 @@ import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
@@ -20,6 +21,9 @@ class AppListActivity : AppListContract.View() {
 
     @Inject
     lateinit var appListAdapter: AppListAdapter
+
+    @Inject
+    lateinit var appListStaggeredGridLayoutManager: LinearLayoutManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,5 +76,18 @@ class AppListActivity : AppListContract.View() {
 
     private fun setupRecyclerView() {
         recyclerview_app_list_activity.adapter = appListAdapter
+        recyclerview_app_list_activity.layoutManager = appListStaggeredGridLayoutManager
+        recyclerview_app_list_activity.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                var totalItemCount = appListStaggeredGridLayoutManager.itemCount
+                var lastVisibleItem = appListStaggeredGridLayoutManager.findLastVisibleItemPosition()
+
+                if (totalItemCount <= lastVisibleItem + 15) {
+                    appListPresenter.getInstalledAppsByParts()
+                }
+            }
+        } )
     }
 }

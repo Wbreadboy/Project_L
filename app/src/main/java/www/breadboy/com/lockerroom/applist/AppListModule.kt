@@ -24,4 +24,8 @@ class AppListModule(var appListActivity: AppListActivity) : BaseModule<AppListAc
     @ActivityScope
     @Provides
     fun provideAppListAdapter(appListActivity: AppListActivity) = AppListAdapter(appListActivity)
+
+    @ActivityScope
+    @Provides
+    fun provideAppListStaggeredGridLayoutManager() = StaggeredGridLayoutManager(3, 1)
 }

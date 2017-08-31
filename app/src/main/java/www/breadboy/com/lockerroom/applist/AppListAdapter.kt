@@ -26,13 +26,8 @@ constructor(val appListActivity: AppListActivity): RecyclerView.Adapter<AppListV
     override fun onBindViewHolder(holder: AppListViewHolder?, position: Int) {
         holder?.bind()
 
-        GlideApp.with(appListActivity)
-                .load("android.resource://${mutableAppList[position].appPackageName}/${mutableAppList[position].appIconId}")
-                .fitCenter()
-                .error(R.mipmap.ic_launcher)
-                .into(holder?.appIconImageView)
-
-        holder?.appNameTextView?.text = mutableAppList[position].appName
+        setAppIconInImageView(holder, position)
+        setAppNameInTextView(holder, position)
     }
 
     fun addApp(app: App) = mutableAppList.add(app)
@@ -44,4 +39,16 @@ constructor(val appListActivity: AppListActivity): RecyclerView.Adapter<AppListV
     fun clearApp() = mutableAppList.clear()
 
     override fun getItemCount() = mutableAppList.size
+
+    private fun setAppIconInImageView(holder: AppListViewHolder?, position: Int) {
+        GlideApp.with(appListActivity)
+                .load("android.resource://${mutableAppList[position].appPackageName}/${mutableAppList[position].appIconId}")
+                .fitCenter()
+                .error(R.mipmap.ic_launcher)
+                .into(holder?.appIconImageView)
+    }
+
+    private fun setAppNameInTextView(holder: AppListViewHolder?, position: Int) {
+        holder?.appNameTextView?.text = mutableAppList[position].appName
+    }
 }
