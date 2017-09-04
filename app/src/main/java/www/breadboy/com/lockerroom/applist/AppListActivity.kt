@@ -3,18 +3,14 @@ package www.breadboy.com.lockerroom.applist
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.Snackbar
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.StaggeredGridLayoutManager
 import android.support.v7.widget.Toolbar
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.content_app_list.*
 import www.breadboy.com.lockerroom.R
 import www.breadboy.com.lockerroom.application.LockerRoomApplication
-import www.breadboy.com.lockerroom.data.App
 import javax.inject.Inject
 
 class AppListActivity : AppListContract.View() {
@@ -78,21 +74,26 @@ class AppListActivity : AppListContract.View() {
     }
 
     private fun setupRecyclerView() {
-        recyclerview_app_list_activity.adapter = appListAdapter
-        recyclerview_app_list_activity.layoutManager = appListStaggeredGridLayoutManager
-        recyclerview_app_list_activity.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
+        recyclerview_app_list_activity.apply {
+            adapter = appListAdapter
+            layoutManager = appListStaggeredGridLayoutManager
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
 
-                var totalItemCount = appListStaggeredGridLayoutManager.itemCount
-                var lastVisibleItem = appListStaggeredGridLayoutManager.findLastVisibleItemPositions(null)[0]
+                    val totalItemCount = appListStaggeredGridLayoutManager.itemCount
+                    val visibleItemCount = appListStaggeredGridLayoutManager.childCount
+                    val pastVisibleItems = appListStaggeredGridLayoutManager.findFirstVisibleItemPositions(null)[0]
 
-                if (totalItemCount <= lastVisibleItem + 5) {
-                    Log.e("!!!!!!!!!!!!!!!!", "$totalItemCount            $lastVisibleItem")
-                    appListPresenter.getInstalledAppsByParts(appListPresenter.appListStartIdx).subscribe({ app -> appListAdapter.addApp(app) })
-                    appListPresenter.appListStartIdx += AppListPresenter.MAX_LOADING_APP_LEN
+                    if (visibleItemCount + pastVisibleItems + AppListPresenter.ADJUSTED_VALUE >= totalItemCount) {
+                        appListPresenter.getInstalledAppsByParts(appListPresenter.appListStartIdx)
+                                .let {
+                                    if (totalItemCount == appListPresenter.applicationInfoList.size) it.dispose()
+                                    disposables.add(it)
+                                }
+                    }
                 }
-            }
-        } )
+            })
+        }
     }
 }
