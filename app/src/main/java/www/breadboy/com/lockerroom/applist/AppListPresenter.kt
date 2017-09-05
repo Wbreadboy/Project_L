@@ -17,7 +17,6 @@ import javax.inject.Inject
  */
 
 class AppListPresenter
-
 @Inject
 constructor(val appListActivity: AppListActivity) : BasePresenter {
 
@@ -38,18 +37,18 @@ constructor(val appListActivity: AppListActivity) : BasePresenter {
                     .filter { !it.packageName.isNullOrEmpty() && it.icon != 0 }
                     .filter { applicationInfoList.indexOf(it) in startIndex until startIndex + MAX_LOADING_APP_LENGTH }
                     .map { appInfo -> App(appInfo.packageName, appInfo.icon, appListActivity.packageManager.getApplicationLabel(appInfo).toString()) }
+
                     .doOnSubscribe {
                         appListStartIdx += MAX_LOADING_APP_LENGTH
                     }
-                    .subscribeOn(Schedulers.io())
+                    .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
+
                     .onBackpressureBuffer()
                     .subscribe({
-                        app ->
-                        appListActivity.appListAdapter.addApp(app)
+                        app -> appListActivity.appListAdapter.addApp(app)
                     }, {
-                        throwable ->
-                        Log.e("$javaClass (getInstalledAppsByParts)", "$throwable")
+                        throwable -> Log.e("$javaClass (getInstalledAppsByParts)", "$throwable")
                     })
 
 }
