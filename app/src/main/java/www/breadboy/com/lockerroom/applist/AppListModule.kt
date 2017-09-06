@@ -1,6 +1,7 @@
 package www.breadboy.com.lockerroom.applist
 
-import android.support.v7.widget.LinearLayoutManager
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.support.v7.widget.StaggeredGridLayoutManager
 import dagger.Module
 import dagger.Provides
@@ -19,7 +20,8 @@ class AppListModule(var appListActivity: AppListActivity) : BaseModule<AppListAc
 
     @ActivityScope
     @Provides
-    fun provideAppListPresenter(appListActivity: AppListActivity) = AppListPresenter(appListActivity)
+    fun provideAppListPresenter(appListActivity: AppListActivity,
+                                installedAppList: MutableList<ApplicationInfo>) = AppListPresenter(appListActivity, installedAppList)
 
     @ActivityScope
     @Provides
@@ -28,4 +30,8 @@ class AppListModule(var appListActivity: AppListActivity) : BaseModule<AppListAc
     @ActivityScope
     @Provides
     fun provideAppListStaggeredGridLayoutManager() = StaggeredGridLayoutManager(3, 1)
+
+    @ActivityScope
+    @Provides
+    fun provideInstalledAppList(appListActivity: AppListActivity) = appListActivity.packageManager.getInstalledApplications(PackageManager.GET_ACTIVITIES)
 }

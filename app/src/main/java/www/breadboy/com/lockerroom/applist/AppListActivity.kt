@@ -1,5 +1,6 @@
 package www.breadboy.com.lockerroom.applist
 
+import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.Snackbar
@@ -8,6 +9,7 @@ import android.support.v7.widget.StaggeredGridLayoutManager
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import kotlinx.android.synthetic.main.content_app_list.*
 import www.breadboy.com.lockerroom.R
 import www.breadboy.com.lockerroom.application.LockerRoomApplication
@@ -23,6 +25,15 @@ class AppListActivity : AppListContract.View() {
 
     @Inject
     lateinit var appListStaggeredGridLayoutManager: StaggeredGridLayoutManager
+
+    @Inject
+    lateinit var installedAppList: MutableList<ApplicationInfo>
+
+    var appListStartIdx = 0
+
+    companion object {
+        const val ADJUSTED_VALUE = 5
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +84,7 @@ class AppListActivity : AppListContract.View() {
                 .injectMembers(this)
     }
 
-    private fun setupRecyclerView() {
+    override fun setupRecyclerView() {
         recyclerview_app_list_activity.apply {
             adapter = appListAdapter
             layoutManager = appListStaggeredGridLayoutManager
@@ -85,15 +96,23 @@ class AppListActivity : AppListContract.View() {
                     val visibleItemCount = appListStaggeredGridLayoutManager.childCount
                     val pastVisibleItems = appListStaggeredGridLayoutManager.findFirstVisibleItemPositions(null)[0]
 
-                    if (visibleItemCount + pastVisibleItems + AppListPresenter.ADJUSTED_VALUE >= totalItemCount) {
-                        appListPresenter.getInstalledAppsByParts(appListPresenter.appListStartIdx)
+                    if (visibleItemCount + pastVisibleItems + ADJUSTED_VALUE >= totalItemCount) {
+                        appListPresenter.getInstalledAppsByParts(appListStartIdx)
                                 .let {
-                                    if (totalItemCount == appListPresenter.applicationInfoList.size) it.dispose()
+                                    if (totalItemCount == installedAppList.size) it.dispose()
                                     disposables.add(it)
                                 }
                     }
                 }
             })
         }
+    }
+
+    override fun showProgressBar() {
+        progressbar_app_list_activity.visibility = View.VISIBLE
+    }
+
+    override fun hideProgressBar() {
+        progressbar_app_list_activity.visibility = View.GONE
     }
 }
