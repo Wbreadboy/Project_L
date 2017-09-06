@@ -25,7 +25,8 @@ class AppListModule(var appListActivity: AppListActivity) : BaseModule<AppListAc
 
     @ActivityScope
     @Provides
-    fun provideAppListAdapter(appListActivity: AppListActivity) = AppListAdapter(appListActivity)
+    fun provideAppListAdapter(appListActivity: AppListActivity,
+                              appListPresenter: AppListPresenter) = AppListAdapter(appListActivity, appListPresenter)
 
     @ActivityScope
     @Provides

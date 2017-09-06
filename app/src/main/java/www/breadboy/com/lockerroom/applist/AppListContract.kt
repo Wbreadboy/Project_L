@@ -5,6 +5,7 @@ import io.reactivex.Flowable
 import io.reactivex.disposables.Disposable
 import www.breadboy.com.lockerroom.base.BaseActivity
 import www.breadboy.com.lockerroom.base.BasePresenter
+import www.breadboy.com.lockerroom.data.App
 
 /**
  * Created by SDG on 2017. 8. 22..
@@ -26,5 +27,7 @@ interface AppListContract {
         fun getInstalledAppsFlowable(startIndex: Int): Flowable<*>
 
         fun getInstalledAppsDispoable(startIndex: Int): Disposable
+
+        fun onInstalledAppClick(holder: AppListViewHolder?, position: Int, app: App)
     }
 }

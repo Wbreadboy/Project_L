@@ -1,5 +1,6 @@
 package www.breadboy.com.lockerroom.applist
 
+import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.util.Log
 import io.reactivex.Flowable
@@ -62,4 +63,8 @@ constructor(val appListActivity: AppListActivity,
                             {
                                 subscription -> subscription.request(Long.MAX_VALUE)
                             })
+
+    override fun onInstalledAppClick(holder: AppListViewHolder?, position: Int, app: App) {
+        appListActivity.appListAdapter.wrapLockIconToLayout(holder, position)
+    }
 }

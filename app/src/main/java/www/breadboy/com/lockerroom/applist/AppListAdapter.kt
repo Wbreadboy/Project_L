@@ -1,6 +1,9 @@
 package www.breadboy.com.lockerroom.applist
 
+import android.support.v4.content.ContextCompat
+import android.support.v7.widget.CardView
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import www.breadboy.com.lockerroom.R
@@ -16,7 +19,8 @@ import javax.inject.Inject
 class AppListAdapter
 
 @Inject
-constructor(val appListActivity: AppListActivity): RecyclerView.Adapter<AppListViewHolder>() {
+constructor(val appListActivity: AppListActivity,
+            val appListPresenter: AppListContract.Presenter): RecyclerView.Adapter<AppListViewHolder>() {
 
     private val mutableAppList: MutableList<App> = arrayListOf()
 
@@ -26,6 +30,7 @@ constructor(val appListActivity: AppListActivity): RecyclerView.Adapter<AppListV
     override fun onBindViewHolder(holder: AppListViewHolder?, position: Int) {
         holder?.bind()
 
+        setAppLayoutInLinearLayout(holder, position)
         setAppIconInImageView(holder, position)
         setAppNameInTextView(holder, position)
     }
@@ -40,6 +45,10 @@ constructor(val appListActivity: AppListActivity): RecyclerView.Adapter<AppListV
 
     override fun getItemCount() = mutableAppList.size
 
+    private fun setAppLayoutInLinearLayout(holder: AppListViewHolder?, position: Int) {
+        holder?.appCardView?.setOnClickListener { onAppListClicked(holder, position, mutableAppList.get(position)) }
+    }
+
     private fun setAppIconInImageView(holder: AppListViewHolder?, position: Int) {
         GlideApp.with(appListActivity)
                 .load("android.resource://${mutableAppList[position].appPackageName}/${mutableAppList[position].appIconId}")
@@ -50,5 +59,20 @@ constructor(val appListActivity: AppListActivity): RecyclerView.Adapter<AppListV
 
     private fun setAppNameInTextView(holder: AppListViewHolder?, position: Int) {
         holder?.appNameTextView?.text = mutableAppList[position].appName
+    }
+
+    fun onAppListClicked(holder: AppListViewHolder?, position: Int, app: App) {
+        appListPresenter.onInstalledAppClick(holder, position, app)
+    }
+
+    fun wrapLockIconToLayout(holder: AppListViewHolder?, position: Int) {
+        GlideApp.with(appListActivity)
+                .load(R.drawable.ic_locked_icon)
+                .fitCenter()
+                .error(R.drawable.ic_locked_icon)
+                .into(holder?.appIconImageView)
+
+        holder?.appCardView?.setCardBackgroundColor(ContextCompat.getColor(appListActivity, android.R.color.black))
+        holder?.appNameTextView?.setTextColor(ContextCompat.getColor(appListActivity, android.R.color.white))
     }
 }
