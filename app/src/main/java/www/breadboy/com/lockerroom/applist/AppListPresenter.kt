@@ -3,10 +3,11 @@ package www.breadboy.com.lockerroom.applist
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.util.Log
+import android.view.View
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.content_app_list.*
 import www.breadboy.com.lockerroom.base.BasePresenter
 import www.breadboy.com.lockerroom.data.App
 import javax.inject.Inject
@@ -32,23 +33,34 @@ constructor(val appListActivity: AppListActivity) : BasePresenter {
         getInstalledAppsByParts(appListStartIdx)
     }
 
-    fun getInstalledAppsByParts(startIndex: Int): Disposable =
+    fun getInstalledAppsByParts(startIndex: Int) = getInstalledAppsDispoable(startIndex)
+
+    private fun getInstalledAppsFlowable(startIndex: Int) =
             Flowable.fromIterable(applicationInfoList)
                     .filter { !it.packageName.isNullOrEmpty() && it.icon != 0 }
                     .filter { applicationInfoList.indexOf(it) in startIndex until startIndex + MAX_LOADING_APP_LENGTH }
                     .map { appInfo -> App(appInfo.packageName, appInfo.icon, appListActivity.packageManager.getApplicationLabel(appInfo).toString()) }
+                    .doOnSubscribe { appListStartIdx += MAX_LOADING_APP_LENGTH }
 
-                    .doOnSubscribe {
-                        appListStartIdx += MAX_LOADING_APP_LENGTH
-                    }
+    private fun getInstalledAppsDispoable(startIndex: Int) =
+            getInstalledAppsFlowable(startIndex)
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
-
                     .onBackpressureBuffer()
-                    .subscribe({
-                        app -> appListActivity.appListAdapter.addApp(app)
-                    }, {
-                        throwable -> Log.e("$javaClass (getInstalledAppsByParts)", "$throwable")
-                    })
-
+                    .subscribe(
+                            { app ->
+                                appListActivity.progressbar_app_list_activity.visibility = View.VISIBLE
+                                appListActivity.appListAdapter.addApp(app)
+                            },
+                            {
+                                throwable ->
+                                Log.e("$javaClass (getInstalledAppsByParts)", "${throwable.printStackTrace()}")
+                                appListActivity.progressbar_app_list_activity.visibility = View.GONE
+                            },
+                            {
+                                appListActivity.progressbar_app_list_activity.visibility = View.GONE
+                            },
+                            {
+                                subscription -> subscription.request(Long.MAX_VALUE)
+                            })
 }
