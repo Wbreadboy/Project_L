@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'realm-android'
 
 android {
     compileSdkVersion 26
@@ -27,7 +28,7 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    androidTestCompile 'com.google.code.findbugs:jsr305:3.0.1'
+    androidTestCompile 'com.google.code.findbugs:jsr305:3.0.2'
 
     compile 'com.android.support:support-v4:26+'
     compile 'com.android.support:appcompat-v7:26.+'
@@ -52,4 +53,7 @@ dependencies {
 }
 repositories {
     mavenCentral()
+}
+realm {
+    syncEnabled = true;
 }
