@@ -24,8 +24,4 @@ abstract class BaseActivity<T> : AppCompatActivity() {
     }
 
     abstract fun setupActivityComponent()
-
-    fun startActionWithClickable(context: Context) {
-
-    }
 }

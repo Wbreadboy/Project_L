@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.util.Log
 import io.reactivex.Flowable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import www.breadboy.com.lockerroom.data.App
@@ -40,12 +41,12 @@ constructor(val appListActivity: AppListActivity,
             Flowable.fromIterable(installedAppList)
                     .filter { !it.packageName.isNullOrEmpty() && it.icon != 0 }
                     .filter { installedAppList.indexOf(it) in startIndex until startIndex + MAX_LOADING_APP_LENGTH }
-                    .map { appInfo -> App(appInfo.packageName, appInfo.icon, appListActivity.packageManager.getApplicationLabel(appInfo).toString()) }
+                    .map { appInfo -> App(appInfo.packageName, appInfo.icon, appListActivity.packageManager.getApplicationLabel(appInfo).toString(), false) }
                     .doOnSubscribe { appListStartIdx += MAX_LOADING_APP_LENGTH }
 
     override fun getInstalledAppsDispoable(startIndex: Int) =
             getInstalledAppsFlowable(startIndex)
-                    .subscribeOn(Schedulers.newThread())
+                    .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .onBackpressureBuffer()
                     .subscribe(
@@ -64,7 +65,19 @@ constructor(val appListActivity: AppListActivity,
                                 subscription -> subscription.request(Long.MAX_VALUE)
                             })
 
-    override fun onInstalledAppClick(holder: AppListViewHolder?, position: Int, app: App) {
-        appListActivity.appListAdapter.wrapLockIconToLayout(holder, position)
-    }
+    override fun onInstalledAppClick(holder: AppListViewHolder?, position: Int, app: App) =
+        Single.just(app)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        {
+                            appInfo -> appListActivity.appListAdapter.let {
+                                if (appInfo.isLocked) it.wrapUnlockedModeAtLayout(holder, position) else it.wrapLockedModeAtLayout(holder, position)
+                            }
+                        },
+                        {
+                            throwable -> Log.e("$javaClass (onInstalledAppClick)", "${throwable.printStackTrace()}")
+                        }
+                )
+
 }

@@ -28,6 +28,6 @@ interface AppListContract {
 
         fun getInstalledAppsDispoable(startIndex: Int): Disposable
 
-        fun onInstalledAppClick(holder: AppListViewHolder?, position: Int, app: App)
+        fun onInstalledAppClick(holder: AppListViewHolder?, position: Int, app: App): Disposable
     }
 }

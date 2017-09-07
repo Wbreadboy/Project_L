@@ -1,9 +1,7 @@
 package www.breadboy.com.lockerroom.applist
 
 import android.support.v4.content.ContextCompat
-import android.support.v7.widget.CardView
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import www.breadboy.com.lockerroom.R
@@ -50,11 +48,12 @@ constructor(val appListActivity: AppListActivity,
     }
 
     private fun setAppIconInImageView(holder: AppListViewHolder?, position: Int) {
-        GlideApp.with(appListActivity)
-                .load("android.resource://${mutableAppList[position].appPackageName}/${mutableAppList[position].appIconId}")
-                .fitCenter()
-                .error(R.mipmap.ic_launcher)
-                .into(holder?.appIconImageView)
+
+        if (mutableAppList[position].isLocked) {
+            wrapLockedModeAtLayout(holder, position)
+        } else {
+            wrapUnlockedModeAtLayout(holder, position)
+        }
     }
 
     private fun setAppNameInTextView(holder: AppListViewHolder?, position: Int) {
@@ -65,7 +64,28 @@ constructor(val appListActivity: AppListActivity,
         appListPresenter.onInstalledAppClick(holder, position, app)
     }
 
-    fun wrapLockIconToLayout(holder: AppListViewHolder?, position: Int) {
+    fun wrapUnlockedModeAtLayout(holder: AppListViewHolder?, position: Int) {
+        mutableAppList[position].isLocked = false
+
+        GlideApp.with(appListActivity)
+                .clear(holder?.appIconImageView)
+
+        GlideApp.with(appListActivity)
+                .load("android.resource://${mutableAppList[position].appPackageName}/${mutableAppList[position].appIconId}")
+                .fitCenter()
+                .error(R.mipmap.ic_launcher)
+                .into(holder?.appIconImageView)
+
+        holder?.appCardView?.setCardBackgroundColor(ContextCompat.getColor(appListActivity, android.R.color.white))
+        holder?.appNameTextView?.setTextColor(ContextCompat.getColor(appListActivity, android.R.color.black))
+    }
+
+    fun wrapLockedModeAtLayout(holder: AppListViewHolder?, position: Int) {
+        mutableAppList[position].isLocked = true
+
+        GlideApp.with(appListActivity)
+                .clear(holder?.appIconImageView)
+
         GlideApp.with(appListActivity)
                 .load(R.drawable.ic_locked_icon)
                 .fitCenter()
