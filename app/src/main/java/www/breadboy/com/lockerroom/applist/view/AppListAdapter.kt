@@ -1,4 +1,4 @@
-package www.breadboy.com.lockerroom.applist
+package www.breadboy.com.lockerroom.applist.view
 
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import www.breadboy.com.lockerroom.R
 import www.breadboy.com.lockerroom.application.GlideApp
+import www.breadboy.com.lockerroom.applist.AppListContract
 import www.breadboy.com.lockerroom.data.App
 import javax.inject.Inject
 

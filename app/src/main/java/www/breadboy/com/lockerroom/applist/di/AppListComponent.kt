@@ -1,6 +1,8 @@
-package www.breadboy.com.lockerroom.applist
+package www.breadboy.com.lockerroom.applist.di
 
 import dagger.Subcomponent
+import www.breadboy.com.lockerroom.applist.ActivityScope
+import www.breadboy.com.lockerroom.applist.view.AppListActivity
 import www.breadboy.com.lockerroom.base.BaseComponent
 import www.breadboy.com.lockerroom.base.ComponentBuilder
 

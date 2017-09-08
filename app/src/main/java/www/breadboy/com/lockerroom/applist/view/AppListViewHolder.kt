@@ -1,4 +1,4 @@
-package www.breadboy.com.lockerroom.applist
+package www.breadboy.com.lockerroom.applist.view
 
 import android.support.v7.widget.CardView
 import android.support.v7.widget.RecyclerView

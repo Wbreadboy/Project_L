@@ -1,13 +1,16 @@
-package www.breadboy.com.lockerroom.applist
+package www.breadboy.com.lockerroom.applist.presenter
 
-import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.util.Log
 import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import www.breadboy.com.lockerroom.applist.AppListContract
+import www.breadboy.com.lockerroom.applist.view.AppListActivity
+import www.breadboy.com.lockerroom.applist.view.AppListViewHolder
 import www.breadboy.com.lockerroom.data.App
+import www.breadboy.com.lockerroom.data.source.local.AppsLocalDataSource
 import javax.inject.Inject
 
 
@@ -41,7 +44,12 @@ constructor(val appListActivity: AppListActivity,
             Flowable.fromIterable(installedAppList)
                     .filter { !it.packageName.isNullOrEmpty() && it.icon != 0 }
                     .filter { installedAppList.indexOf(it) in startIndex until startIndex + MAX_LOADING_APP_LENGTH }
-                    .map { appInfo -> App(appInfo.packageName, appInfo.icon, appListActivity.packageManager.getApplicationLabel(appInfo).toString(), false) }
+                    .map { appInfo -> App(
+                            appInfo.packageName,
+                            appInfo.icon,
+                            appListActivity.packageManager.getApplicationLabel(appInfo).toString(),
+                            false)
+                    }
                     .doOnSubscribe { appListStartIdx += MAX_LOADING_APP_LENGTH }
 
     override fun getInstalledAppsDispoable(startIndex: Int) =
@@ -80,4 +88,22 @@ constructor(val appListActivity: AppListActivity,
                         }
                 )
 
+    fun requestAppMultipleAtRealm() = AppsLocalDataSource()
+                .loadApps()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    list -> run {
+                    AppsLocalDataSource().lockedAppMemoryCache.apply {
+                        clear()
+                        addAll(list)
+                    }
+                }
+                }, {
+                    throwable -> Log.e("$javaClass (requestAppMultiple)", "${throwable.printStackTrace()}")
+                }, {
+
+                }, {
+                    subscription -> subscription.request(Long.MAX_VALUE)
+                })
 }

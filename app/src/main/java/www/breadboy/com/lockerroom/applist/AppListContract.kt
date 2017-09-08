@@ -1,8 +1,8 @@
 package www.breadboy.com.lockerroom.applist
 
-import android.content.Context
 import io.reactivex.Flowable
 import io.reactivex.disposables.Disposable
+import www.breadboy.com.lockerroom.applist.view.AppListViewHolder
 import www.breadboy.com.lockerroom.base.BaseActivity
 import www.breadboy.com.lockerroom.base.BasePresenter
 import www.breadboy.com.lockerroom.data.App

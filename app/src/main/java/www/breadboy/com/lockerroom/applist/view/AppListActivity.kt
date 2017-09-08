@@ -1,4 +1,4 @@
-package www.breadboy.com.lockerroom.applist
+package www.breadboy.com.lockerroom.applist.view
 
 import android.content.pm.ApplicationInfo
 import android.os.Bundle
@@ -13,6 +13,10 @@ import android.view.View
 import kotlinx.android.synthetic.main.content_app_list.*
 import www.breadboy.com.lockerroom.R
 import www.breadboy.com.lockerroom.application.LockerRoomApplication
+import www.breadboy.com.lockerroom.applist.AppListContract
+import www.breadboy.com.lockerroom.applist.presenter.AppListPresenter
+import www.breadboy.com.lockerroom.applist.di.AppListComponent
+import www.breadboy.com.lockerroom.applist.di.AppListModule
 import javax.inject.Inject
 
 class AppListActivity : AppListContract.View() {
@@ -92,17 +96,16 @@ class AppListActivity : AppListContract.View() {
                 override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
 
-                    val totalItemCount = appListStaggeredGridLayoutManager.itemCount
-                    val visibleItemCount = appListStaggeredGridLayoutManager.childCount
-                    val pastVisibleItems = appListStaggeredGridLayoutManager.findFirstVisibleItemPositions(null)[0]
-
-                    if (visibleItemCount + pastVisibleItems + ADJUSTED_VALUE >= totalItemCount) {
-                        appListPresenter.getInstalledAppsByParts(appListStartIdx)
-                                .let {
-                                    if (totalItemCount == installedAppList.size) it.dispose()
-                                    disposables.add(it)
-                                }
+                    appListStaggeredGridLayoutManager.apply {
+                        if (childCount + findFirstVisibleItemPositions(null)[0] + ADJUSTED_VALUE >= itemCount) {
+                            appListPresenter.getInstalledAppsByParts(appListStartIdx)
+                                    .let {
+                                        if (itemCount == installedAppList.size) it.dispose()
+                                        disposables.add(it)
+                                    }
+                        }
                     }
+
                 }
             })
         }

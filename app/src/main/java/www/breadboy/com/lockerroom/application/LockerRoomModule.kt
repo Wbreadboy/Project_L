@@ -3,8 +3,8 @@ package www.breadboy.com.lockerroom.application
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
-import www.breadboy.com.lockerroom.applist.AppListActivity
-import www.breadboy.com.lockerroom.applist.AppListComponent
+import www.breadboy.com.lockerroom.applist.view.AppListActivity
+import www.breadboy.com.lockerroom.applist.di.AppListComponent
 import www.breadboy.com.lockerroom.base.ComponentBuilder
 
 /**

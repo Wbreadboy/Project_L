@@ -1,10 +1,14 @@
-package www.breadboy.com.lockerroom.applist
+package www.breadboy.com.lockerroom.applist.di
 
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.support.v7.widget.StaggeredGridLayoutManager
 import dagger.Module
 import dagger.Provides
+import www.breadboy.com.lockerroom.applist.ActivityScope
+import www.breadboy.com.lockerroom.applist.view.AppListActivity
+import www.breadboy.com.lockerroom.applist.view.AppListAdapter
+import www.breadboy.com.lockerroom.applist.presenter.AppListPresenter
 import www.breadboy.com.lockerroom.base.BaseModule
 
 /**
@@ -34,5 +38,6 @@ class AppListModule(var appListActivity: AppListActivity) : BaseModule<AppListAc
 
     @ActivityScope
     @Provides
-    fun provideInstalledAppList(appListActivity: AppListActivity) = appListActivity.packageManager.getInstalledApplications(PackageManager.GET_ACTIVITIES)
+    fun provideInstalledAppList(appListActivity: AppListActivity) =
+            appListActivity.packageManager.getInstalledApplications(PackageManager.GET_ACTIVITIES)
 }
