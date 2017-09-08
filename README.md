@@ -1,2 +1,2 @@
 # Project_L
-## MVP + Kotlin + RxJava2 + Realm + Glide + Retrofit2
+MVP + Kotlin + Dagger2 + RxJava2 + Realm + Glide + Retrofit2
