@@ -9,17 +9,16 @@ import www.breadboy.com.lockerroom.data.source.local.RealmApp
  */
 interface AppsDataSource {
 
-    fun loadAppByList(appPackageName: String): App?
-    fun loadAppsByList(): Flowable<*>
+    fun loadApp(appPackageName: String): App?
+    fun loadApps(): Flowable<*>
 
-    fun loadAppByRealm()
-    fun loadAppsByRealm()
+    fun saveApp(app: App)
+    fun saveApps(appList: List<App>)
 
-    fun saveAppToList(app: App)
-    fun saveAppsToList(appList: List<App>)
-
-    fun deleteApp()
+    fun deleteApp(app: App)
     fun deleteApps()
+
+    fun appToRealm(app: App): RealmApp
 
     fun isLockedByPackageName(appPackageName: String): Flowable<*>
 }

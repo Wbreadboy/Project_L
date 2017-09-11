@@ -10,6 +10,7 @@ import io.realm.annotations.RealmClass
 
 open class RealmApp : RealmObject() {
 
+    @PrimaryKey
     var appPackageName: String? = null
     var appIconId = -1
     var appName: String? = null

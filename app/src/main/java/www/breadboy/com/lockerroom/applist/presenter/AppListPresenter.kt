@@ -22,7 +22,8 @@ class AppListPresenter
 
 @Inject
 constructor(val appListActivity: AppListActivity,
-            val installedAppList: MutableList<ApplicationInfo>) : AppListContract.Presenter {
+            val installedAppList: MutableList<ApplicationInfo>,
+            val appsLocalDataSource: AppsLocalDataSource) : AppListContract.Presenter {
 
     var appListStartIdx: Int
         get() = appListActivity.appListStartIdx
@@ -35,6 +36,7 @@ constructor(val appListActivity: AppListActivity,
     }
 
     override fun start() {
+        requestAppMultipleFromRealm()
         getInstalledAppsByParts(appListStartIdx)
     }
 
@@ -80,7 +82,13 @@ constructor(val appListActivity: AppListActivity,
                 .subscribe(
                         {
                             appInfo -> appListActivity.appListAdapter.let {
-                                if (appInfo.isLocked) it.wrapUnlockedModeAtLayout(holder, position) else it.wrapLockedModeAtLayout(holder, position)
+                                if (appInfo.isLocked) {
+                                    it.wrapUnlockedModeAtLayout(holder, position)
+                                    appsLocalDataSource.deleteApp(app)
+                                } else {
+                                    it.wrapLockedModeAtLayout(holder, position)
+                                    appsLocalDataSource.saveApp(app)
+                                }
                             }
                         },
                         {
@@ -88,13 +96,13 @@ constructor(val appListActivity: AppListActivity,
                         }
                 )
 
-    fun requestAppMultipleAtRealm() = AppsLocalDataSource()
+    fun requestAppMultipleFromRealm() = appsLocalDataSource
                 .loadApps()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     list -> run {
-                    AppsLocalDataSource().lockedAppMemoryCache.apply {
+                    appsLocalDataSource.lockedAppMemoryCache.apply {
                         clear()
                         addAll(list)
                     }

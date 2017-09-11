@@ -1,6 +1,5 @@
 package www.breadboy.com.lockerroom.data.source.local
 
-import io.reactivex.functions.Action
 import io.reactivex.functions.Function
 import io.realm.Realm
 import io.realm.RealmResults
@@ -10,13 +9,27 @@ import www.breadboy.com.lockerroom.data.source.AppsDataSource
 /**
  * Created by N4039 on 2017-09-07.
  */
+
 class AppsLocalDataSource : AppsDataSource {
 
     val lockedAppMemoryCache: MutableList<App> = mutableListOf()
 
-    override fun loadAppByList(appPackageName: String): App? = lockedAppMemoryCache.firstOrNull { appPackageName.equals(it.appPackageName, true) }
+    override fun loadApp(appPackageName: String): App? = loadAppFromList(appPackageName) ?: loadAppFromRealm(appPackageName)
 
-    override fun loadAppsToList() = RealmFlowable()
+    private fun loadAppFromList(appPackageName: String): App? = lockedAppMemoryCache.firstOrNull { appPackageName.equals(it.appPackageName, true) }
+
+    private fun loadAppFromRealm(appPackageName: String): App? {
+        var app: App? = null
+
+        RealmFlowable()
+                .getRealmObject(Function<Realm, RealmApp> { realm -> realm.where(RealmApp::class.java).equalTo("package_name", appPackageName).findFirst()!! })
+                .map { realmApp -> app = realmApp.let { App(it.appPackageName!!, it.appIconId, it.appName!!, it.isLocked) } }
+                .subscribe()
+
+        return app
+    }
+
+    override fun loadApps() = RealmFlowable()
             .getRealmResult(Function<Realm, RealmResults<RealmApp>> { realm -> realm.where(RealmApp::class.java).findAll() })
             .map(object : Function<RealmResults<RealmApp>, List<App>> {
                 override fun apply(realmResults: RealmResults<RealmApp>): List<App> {
@@ -29,29 +42,45 @@ class AppsLocalDataSource : AppsDataSource {
             })
 
     override fun saveApp(app: App) {
-        val realmApp = RealmApp().apply {
-            appPackageName = app.appPackageName
-            appIconId = app.appIconId
-            appName = app.appName
-            isLocked = app.isLocked
-        }
-
-        RealmFlowable()
-                .getRealmObject(Function<Realm, RealmApp> { realm -> realm.copyToRealmOrUpdate(realmApp) })
-                //.map({ realmApp -> loadApp(realmApp) })
+        saveAppToList(app)
+        saveAppToRealm(app)
     }
+
+    private fun saveAppToList(app: App) =
+            lockedAppMemoryCache.firstOrNull { app.appPackageName.equals(it.appPackageName, true) } ?: lockedAppMemoryCache.add(app)
+
+    private fun saveAppToRealm(app: App) = RealmFlowable()
+            .getRealmObject(Function<Realm, RealmApp> { realm -> realm.copyToRealmOrUpdate(appToRealm(app)) })
+            .subscribe()
+
 
     override fun saveApps(appList: List<App>) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun deleteApp() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun deleteApp(app: App) {
+        deleteAppToList(app)
+        deleteAppToRealm(app)
     }
+
+    private fun deleteAppToList(app: App) = lockedAppMemoryCache.remove(app)
+
+    private fun deleteAppToRealm(app: App) = RealmFlowable()
+            .getRealmResult(Function<Realm, RealmResults<RealmApp>> { realm -> realm.where(RealmApp::class.java).equalTo("package_name", app.appPackageName).findAll() })
+            .map { realmResults -> realmResults.deleteAllFromRealm() }
+            .subscribe()
 
     override fun deleteApps() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
+
+    override fun appToRealm(app: App): RealmApp =
+            RealmApp().apply {
+                appPackageName = app.appPackageName
+                appIconId = app.appIconId
+                appName = app.appName
+                isLocked = app.isLocked
+            }
 
     override fun isLockedByPackageName(appPackageName: String) = RealmFlowable()
             .getRealmObject(Function<Realm, RealmApp> {

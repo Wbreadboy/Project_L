@@ -12,7 +12,7 @@ import io.realm.RealmObject
 abstract class RealmAppOnSubscribe<T> : FlowableOnSubscribe<T> {
 
     override fun subscribe(emitter: FlowableEmitter<T>) {
-        val realm = Realm.getDefaultInstance()
+        val realm = Realm.getInstance()
 
         // TODO : in flowable
         try { realm.close() } catch (e: Exception) { emitter.onError(e) }

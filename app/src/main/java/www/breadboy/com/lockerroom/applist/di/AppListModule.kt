@@ -10,6 +10,7 @@ import www.breadboy.com.lockerroom.applist.view.AppListActivity
 import www.breadboy.com.lockerroom.applist.view.AppListAdapter
 import www.breadboy.com.lockerroom.applist.presenter.AppListPresenter
 import www.breadboy.com.lockerroom.base.BaseModule
+import www.breadboy.com.lockerroom.data.source.local.AppsLocalDataSource
 
 /**
  * Created by SDG on 2017. 8. 22..
@@ -25,7 +26,8 @@ class AppListModule(var appListActivity: AppListActivity) : BaseModule<AppListAc
     @ActivityScope
     @Provides
     fun provideAppListPresenter(appListActivity: AppListActivity,
-                                installedAppList: MutableList<ApplicationInfo>) = AppListPresenter(appListActivity, installedAppList)
+                                installedAppList: MutableList<ApplicationInfo>,
+                                appsLocalDataSource: AppsLocalDataSource) = AppListPresenter(appListActivity, installedAppList, appsLocalDataSource)
 
     @ActivityScope
     @Provides
@@ -40,4 +42,8 @@ class AppListModule(var appListActivity: AppListActivity) : BaseModule<AppListAc
     @Provides
     fun provideInstalledAppList(appListActivity: AppListActivity) =
             appListActivity.packageManager.getInstalledApplications(PackageManager.GET_ACTIVITIES)
+
+    @ActivityScope
+    @Provides
+    fun provideInstalledAppDataSource() = AppsLocalDataSource()
 }
