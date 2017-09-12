@@ -50,7 +50,7 @@ constructor(val appListActivity: AppListActivity,
 
     private fun setAppIconInImageView(holder: AppListViewHolder?, position: Int) {
 
-        if (mutableAppList[position].isLocked) {
+        if (mutableAppList[position].locked) {
             wrapLockedModeAtLayout(holder, position)
         } else {
             wrapUnlockedModeAtLayout(holder, position)
@@ -66,13 +66,13 @@ constructor(val appListActivity: AppListActivity,
     }
 
     fun wrapUnlockedModeAtLayout(holder: AppListViewHolder?, position: Int) {
-        mutableAppList[position].isLocked = false
+        mutableAppList[position].locked = false
 
         GlideApp.with(appListActivity)
                 .clear(holder?.appIconImageView)
 
         GlideApp.with(appListActivity)
-                .load("android.resource://${mutableAppList[position].appPackageName}/${mutableAppList[position].appIconId}")
+                .load("android.resource://${mutableAppList[position].packageName}/${mutableAppList[position].iconId}")
                 .fitCenter()
                 .error(R.mipmap.ic_launcher)
                 .into(holder?.appIconImageView)
@@ -82,7 +82,7 @@ constructor(val appListActivity: AppListActivity,
     }
 
     fun wrapLockedModeAtLayout(holder: AppListViewHolder?, position: Int) {
-        mutableAppList[position].isLocked = true
+        mutableAppList[position].locked = true
 
         GlideApp.with(appListActivity)
                 .clear(holder?.appIconImageView)

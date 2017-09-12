@@ -1,15 +1,12 @@
 package www.breadboy.com.lockerroom.data.source.local
 
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
+import android.util.Base64
+import android.util.Log
 import io.realm.RealmConfiguration
 import io.realm.annotations.RealmModule
-import java.security.CryptoPrimitive
-import java.security.KeyPairGenerator
+import www.breadboy.com.lockerroom.application.LockerRoomApplication
 import java.security.KeyStore
-import java.security.spec.KeySpec
-import java.util.*
-import javax.crypto.KeyGenerator
+import javax.crypto.Cipher
 import javax.crypto.SecretKey
 
 /**
@@ -19,30 +16,17 @@ import javax.crypto.SecretKey
 @RealmModule(classes = arrayOf(RealmApp::class))
 class RealmAppModule {
 
-    fun appConfig() {
-        val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
-        keyGenerator.init(KeyGenParameterSpec.Builder("key1", KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
-                .setKeySize(256)
-                .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
-                .setRandomizedEncryptionRequired(true)
-                .setUserAuthenticationRequired(true)
-                .setUserAuthenticationValidityDurationSeconds(5 * 60)
-                .build())
+    fun appConfig(): RealmConfiguration {
+        val keyStore = KeyStore.getInstance(LockerRoomApplication.ANDROID_KEY_STORE).apply {
 
-        val secretKey = keyGenerator.generateKey()
-
-        // retrieval
-        val keyStore = KeyStore.getInstance("AndroidKeyStore")
+        }
         keyStore.load(null)
 
-        val entry = keyStore.getEntry("key1", null) as KeyStore.SecretKeyEntry
-        val key = keyStore.getCertificate("key1").encoded
-
-        RealmConfiguration.Builder()
-                .name("locked_apps.realm")
-                .encryptionKey(key)
-                .schemaVersion(1)
+        return RealmConfiguration.Builder()
+                .name(LockerRoomApplication.REALM_CONFIG_NAME_APPS)
+                .encryptionKey((keyStore.getCertificate(LockerRoomApplication.ALIAS_KEY_REALM_APPS).encoded))
+                .migration(RealmAppMigration())
+                .schemaVersion(0)
                 .modules(RealmAppModule())
                 .build()
     }

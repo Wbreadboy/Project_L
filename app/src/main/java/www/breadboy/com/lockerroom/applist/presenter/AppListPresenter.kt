@@ -82,7 +82,7 @@ constructor(val appListActivity: AppListActivity,
                 .subscribe(
                         {
                             appInfo -> appListActivity.appListAdapter.let {
-                                if (appInfo.isLocked) {
+                                if (appInfo.locked) {
                                     it.wrapUnlockedModeAtLayout(holder, position)
                                     appsLocalDataSource.deleteApp(app)
                                 } else {
