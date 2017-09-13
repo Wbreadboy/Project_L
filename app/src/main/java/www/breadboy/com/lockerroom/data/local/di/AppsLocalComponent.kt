@@ -12,6 +12,6 @@ import javax.inject.Singleton
 @Subcomponent(modules = arrayOf(AppsLocalModule::class))
 interface AppsLocalComponent {
 
-    @Subcomponent.Builder
-    interface Builder : ComponentBuilder<AppsLocalModule, AppsLocalComponent>
+    //@Subcomponent.Builder
+    //interface Builder : ComponentBuilder<AppsLocalModule, AppsLocalComponent>
 }

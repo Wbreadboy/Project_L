@@ -98,7 +98,8 @@ class AppListActivity : AppListContract.View() {
 
                     appListStaggeredGridLayoutManager.apply {
                         if (childCount + findFirstVisibleItemPositions(null)[0] + ADJUSTED_VALUE >= itemCount) {
-                            appListPresenter.getInstalledAppsByParts(appListStartIdx)
+                            //appListPresenter.getInstalledAppsByParts(appListStartIdx)
+                            appListPresenter.installedAppInfomations()
                                     .let {
                                         if (itemCount == installedAppList.size) it.dispose()
                                         disposables.add(it)

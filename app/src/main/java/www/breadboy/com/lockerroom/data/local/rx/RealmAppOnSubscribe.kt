@@ -3,6 +3,8 @@ package www.breadboy.com.lockerroom.data.local.rx
 import io.reactivex.FlowableEmitter
 import io.reactivex.FlowableOnSubscribe
 import io.realm.Realm
+import io.realm.RealmObject
+import www.breadboy.com.lockerroom.application.LockerRoomApplication
 import www.breadboy.com.lockerroom.data.local.realm.RealmAppModule
 
 /**
@@ -15,19 +17,20 @@ abstract class RealmAppOnSubscribe<T> : FlowableOnSubscribe<T> {
         var realmObj: T? = null
 
         // TODO : Injection 필요 - RealmAppModule
-        Realm.getInstance(RealmAppModule().appConfig()). let {
+        Realm.getInstance(LockerRoomApplication.realmAppConfig). let {
             // TODO : in flowable
             emitter.setCancellable {
-                try {
-                    it.close()
-                } catch (e: Exception) {
-                    emitter.onError(e)
-                }
+
             }
 
             it.beginTransaction()
+
             try {
                 realmObj = get(it)
+
+                emitter.onNext(realmObj!!)
+                emitter.onComplete()
+
                 it.commitTransaction()
             } catch (e: Exception) {
                 it.cancelTransaction()
@@ -35,10 +38,15 @@ abstract class RealmAppOnSubscribe<T> : FlowableOnSubscribe<T> {
 
                 return
             }
-        }
 
-        emitter.onNext(realmObj!!)
-        emitter.onComplete()
+
+
+            /*try {
+                it.close()
+            } catch (e: Exception) {
+                emitter.onError(e)
+            }*/
+        }
     }
 
     abstract fun get(realm: Realm): T

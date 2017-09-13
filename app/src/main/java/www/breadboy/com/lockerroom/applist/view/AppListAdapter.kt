@@ -21,7 +21,7 @@ class AppListAdapter
 constructor(val appListActivity: AppListActivity,
             val appListPresenter: AppListContract.Presenter): RecyclerView.Adapter<AppListViewHolder>() {
 
-    private val mutableAppList: MutableList<App> = arrayListOf()
+    val mutableAppList: MutableList<App> = arrayListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int) =
             AppListViewHolder(LayoutInflater.from(parent?.context).inflate(R.layout.applist_cardview, parent, false))

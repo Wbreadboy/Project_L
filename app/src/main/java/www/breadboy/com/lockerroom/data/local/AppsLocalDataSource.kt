@@ -1,5 +1,7 @@
 package www.breadboy.com.lockerroom.data.local
 
+import android.text.TextUtils
+import android.util.Log
 import io.reactivex.functions.Function
 import io.realm.Realm
 import io.realm.RealmResults
@@ -16,7 +18,7 @@ class AppsLocalDataSource : AppsDataSource {
 
     val lockedAppMemoryCache: MutableList<App> = mutableListOf()
 
-    override fun loadApp(appPackageName: String): App? = loadAppFromList(appPackageName) ?: loadAppFromRealm(appPackageName)
+    override fun loadApp(appPackageName: String): App? = loadAppFromList(appPackageName)
 
     private fun loadAppFromList(appPackageName: String): App? = lockedAppMemoryCache.firstOrNull { appPackageName.equals(it.packageName, true) }
 
@@ -24,8 +26,8 @@ class AppsLocalDataSource : AppsDataSource {
         var app: App? = null
 
         RealmFlowable()
-                .getRealmObject(Function<Realm, RealmApp> { realm -> realm.where(RealmApp::class.java).equalTo("package_name", appPackageName).findFirst()!! })
-                .map { realmApp -> app = realmApp.let { App(it.packageName!!, it.iconId, it.appName!!, it.locked) } }
+                .getRealmObject(Function<Realm, RealmApp> { realm -> realm.where(RealmApp::class.java).equalTo("packageName", appPackageName).findFirst() ?: RealmApp() })
+                .map { realmApp -> app = realmApp.let { App(it.packageName, it.iconId, it.appName, it.locked) } }
                 .subscribe()
 
         return app
@@ -36,7 +38,7 @@ class AppsLocalDataSource : AppsDataSource {
             .map(object : Function<RealmResults<RealmApp>, List<App>> {
                 override fun apply(realmResults: RealmResults<RealmApp>): List<App> {
                     mutableListOf<App>().let {
-                        realmResults.forEach { realmApp ->  it.add(App(realmApp.packageName!!, realmApp.iconId, realmApp.appName!!, realmApp.locked)) }
+                        realmResults.forEach { realmApp ->  it.add(App(realmApp.packageName, realmApp.iconId, realmApp.appName, realmApp.locked)) }
 
                         return it
                     }
@@ -68,7 +70,7 @@ class AppsLocalDataSource : AppsDataSource {
     private fun deleteAppToList(app: App) = lockedAppMemoryCache.remove(app)
 
     private fun deleteAppToRealm(app: App) = RealmFlowable()
-            .getRealmResult(Function<Realm, RealmResults<RealmApp>> { realm -> realm.where(RealmApp::class.java).equalTo("package_name", app.packageName).findAll() })
+            .getRealmResult(Function<Realm, RealmResults<RealmApp>> { realm -> realm.where(RealmApp::class.java).equalTo("packageName", app.packageName).findAll() })
             .map { realmResults -> realmResults.deleteAllFromRealm() }
             .subscribe()
 
@@ -86,7 +88,7 @@ class AppsLocalDataSource : AppsDataSource {
 
     override fun isLockedByPackageName(appPackageName: String) = RealmFlowable()
             .getRealmObject(Function<Realm, RealmApp> {
-                realm -> realm.where(RealmApp::class.java).equalTo("package_name", appPackageName).findFirst() as RealmApp
+                realm -> realm.where(RealmApp::class.java).equalTo("packageName", appPackageName).findFirst() as RealmApp
             })
             //.map { realmApp -> loadApp(realmApp) }
 }

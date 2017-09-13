@@ -7,7 +7,7 @@ import dagger.multibindings.IntoMap
  */
 
 data class App(
-        var packageName: String,
+        var packageName: String?,
         var iconId: Int,
-        var appName: String,
+        var appName: String?,
         var locked: Boolean)

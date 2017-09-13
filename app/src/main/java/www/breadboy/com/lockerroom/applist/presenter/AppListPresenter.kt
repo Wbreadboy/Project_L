@@ -1,11 +1,15 @@
 package www.breadboy.com.lockerroom.applist.presenter
 
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.util.Log
+import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import org.reactivestreams.Publisher
+import org.reactivestreams.Subscriber
 import www.breadboy.com.lockerroom.applist.AppListContract
 import www.breadboy.com.lockerroom.applist.view.AppListActivity
 import www.breadboy.com.lockerroom.applist.view.AppListViewHolder
@@ -37,8 +41,69 @@ constructor(val appListActivity: AppListActivity,
 
     override fun start() {
         requestAppMultipleFromRealm()
-        getInstalledAppsByParts(appListStartIdx)
     }
+
+    var installedAppInfoList: MutableList<ApplicationInfo> = mutableListOf()
+    fun installedAppInfomations() =
+        Flowable.create<MutableList<ApplicationInfo>>({
+            if (installedAppInfoList.isEmpty()) {
+                installedAppInfoList = appListActivity.packageManager.getInstalledApplications(PackageManager.GET_ACTIVITIES)
+                installedAppInfoList
+                        .filter { it.icon == 0 }
+                        .map { installedAppInfoList.remove(it) }
+            }
+
+            it.onNext(installedAppInfoList)
+            it.onComplete()
+        }, BackpressureStrategy.BUFFER)
+                //.sorted()
+                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.newThread())
+                .subscribe({
+                    Flowable.fromIterable(installedAppInfoList)
+                            .filter { installedAppInfoList.indexOf(it) in appListStartIdx until appListStartIdx + MAX_LOADING_APP_LENGTH }
+
+                            /*.buffer(Flowable.fromIterable(installedAppInfoList)
+                                    .filter { (installedAppInfoList.indexOf(it) >= appListStartIdx + MAX_LOADING_APP_LENGTH - 1) or
+                                            (installedAppInfoList.indexOf(it) >= installedAppInfoList.lastIndex) }
+                                    .map { App(it.packageName, it.icon, appListActivity.packageManager.getApplicationLabel(it).toString(),
+                                            appsLocalDataSource.loadApp(it.packageName)?.locked ?: false) }
+                                    .take(1))*/
+                            .window(25)
+
+                            .map { appInfo -> App(
+                                    appInfo.packageName,
+                                    appInfo.icon,
+                                    appListActivity.packageManager.getApplicationLabel(appInfo).toString(),
+                                    appsLocalDataSource.loadApp(appInfo.packageName)?.locked ?: false)
+                            }
+
+                            //.filter { installedAppInfoList.indexOf(it) in appListStartIdx until appListStartIdx + MAX_LOADING_APP_LENGTH }
+                            .doOnSubscribe {
+                                appListStartIdx += MAX_LOADING_APP_LENGTH
+                                Log.e("!!!!!!!!!!!!!!!!!", "$appListStartIdx")
+                            }
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .onBackpressureBuffer()
+                            .subscribe(
+                                    { app ->
+                                        Log.e("!!!!!!!!!!!!!!!", "${app.size}")
+                                        appListActivity.showProgressBar()
+                                        appListActivity.appListAdapter.addApps(app)
+                                    },
+                                    {
+                                        throwable -> Log.e("$javaClass (getInstalledAppsByParts)", "${throwable.printStackTrace()}")
+                                        appListActivity.hideProgressBar()
+                                    },
+                                    {
+                                        appListActivity.appListAdapter.notifyDataSetChanged()
+                                        appListActivity.hideProgressBar()
+                                    },
+                                    {
+                                        subscription -> subscription.request(Long.MAX_VALUE)
+                                    })
+                })
 
     override fun getInstalledAppsByParts(startIndex: Int) = getInstalledAppsDispoable(startIndex)
 
@@ -52,7 +117,10 @@ constructor(val appListActivity: AppListActivity,
                             appListActivity.packageManager.getApplicationLabel(appInfo).toString(),
                             appsLocalDataSource.loadApp(appInfo.packageName)?.locked ?: false)
                     }
-                    .doOnSubscribe { appListStartIdx += MAX_LOADING_APP_LENGTH }
+                    .doOnSubscribe {
+                        appListStartIdx += MAX_LOADING_APP_LENGTH
+                    }
+
 
     override fun getInstalledAppsDispoable(startIndex: Int) =
             getInstalledAppsFlowable(startIndex)
@@ -69,6 +137,7 @@ constructor(val appListActivity: AppListActivity,
                                 appListActivity.hideProgressBar()
                             },
                             {
+                                appListActivity.appListAdapter.notifyDataSetChanged()
                                 appListActivity.hideProgressBar()
                             },
                             {
@@ -106,6 +175,9 @@ constructor(val appListActivity: AppListActivity,
                         clear()
                         addAll(list)
                     }
+
+                    //getInstalledAppsByParts(appListStartIdx)
+                    installedAppInfomations()
                 }
                 }, {
                     throwable -> Log.e("$javaClass (requestAppMultiple)", "${throwable.printStackTrace()}")

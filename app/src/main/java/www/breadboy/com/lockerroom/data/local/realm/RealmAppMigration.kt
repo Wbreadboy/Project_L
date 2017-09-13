@@ -15,12 +15,6 @@ class RealmAppMigration : RealmMigration {
 
         when (oldVer) {
             0.toLong() -> {
-                schema?.create("App")
-                        ?.addField("package_name", String::class.java)
-                        ?.addField("icon_id", Int::class.java)
-                        ?.addField("app_name", String::class.java)
-                        ?.addField("locked", Boolean::class.java)
-
                 oldVer++
             }
         }

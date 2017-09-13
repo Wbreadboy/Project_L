@@ -10,9 +10,11 @@ import android.security.keystore.KeyProperties
 import android.util.Base64
 import android.util.Log
 import io.realm.Realm
+import io.realm.RealmConfiguration
 import io.realm.log.RealmLog
 import www.breadboy.com.lockerroom.base.ComponentBuilder
 import www.breadboy.com.lockerroom.base.WhichSubcomponentBuilders
+import www.breadboy.com.lockerroom.data.local.realm.RealmAppModule
 import java.security.KeyFactory
 import java.security.KeyPairGenerator
 import java.security.KeyStore
@@ -35,6 +37,7 @@ class LockerRoomApplication : Application(), WhichSubcomponentBuilders {
     companion object {
         const val REALM_CONFIG_NAME_APPS = "locked_apps.realm"
         lateinit var REALM_ENCRYPTION_KEY_APPS: ByteArray
+        lateinit var realmAppConfig: RealmConfiguration
 
         operator fun get(context: Context): WhichSubcomponentBuilders {
             return context.applicationContext as WhichSubcomponentBuilders
@@ -47,6 +50,7 @@ class LockerRoomApplication : Application(), WhichSubcomponentBuilders {
         setupLockerRoomModule()
         setupRealm()
         setupRealmKey()
+        setupRealmConfiguration()
     }
 
     private fun setupLockerRoomModule() = DaggerLockerRoomComponent.create().inject(this)
@@ -58,6 +62,10 @@ class LockerRoomApplication : Application(), WhichSubcomponentBuilders {
 
     private fun setupRealmKey() {
         REALM_ENCRYPTION_KEY_APPS = Settings.Secure.getString(this.contentResolver, Settings.Secure.ANDROID_ID).dropLast(1).toByteArray(Charsets.UTF_32)
+    }
+
+    private fun setupRealmConfiguration() {
+        realmAppConfig = RealmAppModule().appConfig()
     }
 
     override fun getComponentBuilder(activity: Class<out Activity>) = lockerRoomComponentBuilders[activity]!!.get()

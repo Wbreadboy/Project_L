@@ -16,6 +16,6 @@ class RealmAppModule {
             .encryptionKey(LockerRoomApplication.REALM_ENCRYPTION_KEY_APPS)
             .migration(RealmAppMigration())
             .schemaVersion(0)
-            .modules(RealmAppModule())
+            .modules(this)
             .build()
 }
