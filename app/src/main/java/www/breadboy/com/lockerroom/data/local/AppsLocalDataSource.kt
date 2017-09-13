@@ -1,10 +1,12 @@
-package www.breadboy.com.lockerroom.data.source.local
+package www.breadboy.com.lockerroom.data.local
 
 import io.reactivex.functions.Function
 import io.realm.Realm
 import io.realm.RealmResults
 import www.breadboy.com.lockerroom.data.App
-import www.breadboy.com.lockerroom.data.source.AppsDataSource
+import www.breadboy.com.lockerroom.data.AppsDataSource
+import www.breadboy.com.lockerroom.data.local.rx.RealmFlowable
+import www.breadboy.com.lockerroom.data.local.realm.RealmApp
 
 /**
  * Created by N4039 on 2017-09-07.
@@ -84,6 +86,7 @@ class AppsLocalDataSource : AppsDataSource {
 
     override fun isLockedByPackageName(appPackageName: String) = RealmFlowable()
             .getRealmObject(Function<Realm, RealmApp> {
-                realm -> realm.where(RealmApp::class.java).equalTo("package_name", appPackageName).findFirst() as RealmApp })
+                realm -> realm.where(RealmApp::class.java).equalTo("package_name", appPackageName).findFirst() as RealmApp
+            })
             //.map { realmApp -> loadApp(realmApp) }
 }

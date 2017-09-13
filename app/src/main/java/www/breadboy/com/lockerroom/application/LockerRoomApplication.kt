@@ -33,9 +33,8 @@ class LockerRoomApplication : Application(), WhichSubcomponentBuilders {
     lateinit var lockerRoomComponentBuilders: Map<Class<out Activity>, @JvmSuppressWildcards Provider<ComponentBuilder<*, *>>>
 
     companion object {
-        const val ANDROID_KEY_STORE = "AndroidKeyStore"
-        const val ALIAS_KEY_REALM_APPS = "locked_apps.realm.android_key_store"
         const val REALM_CONFIG_NAME_APPS = "locked_apps.realm"
+        lateinit var REALM_ENCRYPTION_KEY_APPS: ByteArray
 
         operator fun get(context: Context): WhichSubcomponentBuilders {
             return context.applicationContext as WhichSubcomponentBuilders
@@ -58,55 +57,8 @@ class LockerRoomApplication : Application(), WhichSubcomponentBuilders {
     }
 
     private fun setupRealmKey() {
-        KeyStore.getInstance(ANDROID_KEY_STORE)
-                .apply {
-                    load(null)
-                    getCertificate(ALIAS_KEY_REALM_APPS)?.encoded ?: generateSecretKey(ALIAS_KEY_REALM_APPS)
-
-                    Log.e("!!!!!!!!!!!!!!!!!!", "${getCertificate(ALIAS_KEY_REALM_APPS)?.encoded}")
-                }
+        REALM_ENCRYPTION_KEY_APPS = Settings.Secure.getString(this.contentResolver, Settings.Secure.ANDROID_ID).dropLast(1).toByteArray(Charsets.UTF_32)
     }
-
-    private fun generateSecretKey(alias: String) {
-        KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEY_STORE).apply {
-            init(KeyGenParameterSpec
-                    .Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
-                    //.setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                    //.setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                    .build())
-
-            val secretKey = generateKey()
-        }
-
-
-
-            KeyStore.getInstance(ANDROID_KEY_STORE)
-                    .apply {
-                        load(null)
-
-                        Log.e("!!!!!!!!!!!!!!!!!!", "gen ${getCertificate(ALIAS_KEY_REALM_APPS)?.encoded}")
-                    }
-        }
-
-        /*KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, ANDROID_KEY_STORE).apply {
-            initialize(KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
-                    .setKeySize(512)
-                    .setDigests(KeyProperties.DIGEST_SHA512)
-                    .build())
-
-            generateKeyPair()*/
-
-
-            /*val keyStore = KeyStore.getInstance(ANDROID_KEY_STORE)
-            keyStore.load(null)
-
-            val signature = Signature.getInstance("SHA256withECDSA")
-            signature.initSign((keyStore.getEntry(alias, null) as KeyStore.PrivateKeyEntry).privateKey)
-
-
-            Log.e("!!!!!!!!!!!!!!!!!!", "${signature.sign()}")*/
-
-
 
     override fun getComponentBuilder(activity: Class<out Activity>) = lockerRoomComponentBuilders[activity]!!.get()
 }

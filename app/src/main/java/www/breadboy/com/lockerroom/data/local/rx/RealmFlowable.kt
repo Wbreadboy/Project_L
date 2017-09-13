@@ -1,4 +1,4 @@
-package www.breadboy.com.lockerroom.data.source.local
+package www.breadboy.com.lockerroom.data.local.rx
 
 import io.reactivex.*
 import io.reactivex.functions.Function

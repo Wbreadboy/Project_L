@@ -10,7 +10,7 @@ import www.breadboy.com.lockerroom.applist.view.AppListActivity
 import www.breadboy.com.lockerroom.applist.view.AppListAdapter
 import www.breadboy.com.lockerroom.applist.presenter.AppListPresenter
 import www.breadboy.com.lockerroom.base.BaseModule
-import www.breadboy.com.lockerroom.data.source.local.AppsLocalDataSource
+import www.breadboy.com.lockerroom.data.local.AppsLocalDataSource
 
 /**
  * Created by SDG on 2017. 8. 22..

@@ -10,7 +10,7 @@ import www.breadboy.com.lockerroom.applist.AppListContract
 import www.breadboy.com.lockerroom.applist.view.AppListActivity
 import www.breadboy.com.lockerroom.applist.view.AppListViewHolder
 import www.breadboy.com.lockerroom.data.App
-import www.breadboy.com.lockerroom.data.source.local.AppsLocalDataSource
+import www.breadboy.com.lockerroom.data.local.AppsLocalDataSource
 import javax.inject.Inject
 
 
@@ -50,7 +50,7 @@ constructor(val appListActivity: AppListActivity,
                             appInfo.packageName,
                             appInfo.icon,
                             appListActivity.packageManager.getApplicationLabel(appInfo).toString(),
-                            false)
+                            appsLocalDataSource.loadApp(appInfo.packageName)?.locked ?: false)
                     }
                     .doOnSubscribe { appListStartIdx += MAX_LOADING_APP_LENGTH }
 

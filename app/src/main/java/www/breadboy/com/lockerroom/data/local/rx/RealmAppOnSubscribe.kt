@@ -1,10 +1,9 @@
-package www.breadboy.com.lockerroom.data.source.local
+package www.breadboy.com.lockerroom.data.local.rx
 
 import io.reactivex.FlowableEmitter
 import io.reactivex.FlowableOnSubscribe
 import io.realm.Realm
-import io.realm.RealmObject
-import io.realm.annotations.RealmModule
+import www.breadboy.com.lockerroom.data.local.realm.RealmAppModule
 
 /**
  * Created by N4039 on 2017-09-08.
@@ -18,7 +17,13 @@ abstract class RealmAppOnSubscribe<T> : FlowableOnSubscribe<T> {
         // TODO : Injection 필요 - RealmAppModule
         Realm.getInstance(RealmAppModule().appConfig()). let {
             // TODO : in flowable
-            try { it.close() } catch (e: Exception) { emitter.onError(e) }
+            emitter.setCancellable {
+                try {
+                    it.close()
+                } catch (e: Exception) {
+                    emitter.onError(e)
+                }
+            }
 
             it.beginTransaction()
             try {

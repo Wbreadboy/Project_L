@@ -1,4 +1,4 @@
-package www.breadboy.com.lockerroom.data.source.local
+package www.breadboy.com.lockerroom.data.local.realm
 
 import io.realm.DynamicRealm
 import io.realm.RealmMigration

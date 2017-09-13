@@ -1,8 +1,7 @@
-package www.breadboy.com.lockerroom.data.source
+package www.breadboy.com.lockerroom.data
 
 import io.reactivex.Flowable
-import www.breadboy.com.lockerroom.data.App
-import www.breadboy.com.lockerroom.data.source.local.RealmApp
+import www.breadboy.com.lockerroom.data.local.realm.RealmApp
 
 /**
  * Created by N4039 on 2017-09-07.
