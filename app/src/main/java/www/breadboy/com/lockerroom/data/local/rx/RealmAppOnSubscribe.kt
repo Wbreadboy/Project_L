@@ -39,8 +39,6 @@ abstract class RealmAppOnSubscribe<T> : FlowableOnSubscribe<T> {
                 return
             }
 
-
-
             /*try {
                 it.close()
             } catch (e: Exception) {

@@ -2,11 +2,15 @@ package www.breadboy.com.lockerroom.applist.presenter
 
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.support.v4.content.ContextCompat
 import android.util.Log
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.functions.Function
 import io.reactivex.schedulers.Schedulers
 import org.reactivestreams.Publisher
 import org.reactivestreams.Subscriber
@@ -36,7 +40,7 @@ constructor(val appListActivity: AppListActivity,
         }
 
     companion object {
-        const val MAX_LOADING_APP_LENGTH = 25
+        const val MAX_LOADING_APP_LENGTH = 35
     }
 
     override fun start() {
@@ -44,66 +48,81 @@ constructor(val appListActivity: AppListActivity,
     }
 
     var installedAppInfoList: MutableList<ApplicationInfo> = mutableListOf()
+    var installedAppList2: MutableList<App> = mutableListOf()
+
     fun installedAppInfomations() =
         Flowable.create<MutableList<ApplicationInfo>>({
-            if (installedAppInfoList.isEmpty()) {
-                installedAppInfoList = appListActivity.packageManager.getInstalledApplications(PackageManager.GET_ACTIVITIES)
-                installedAppInfoList
-                        .filter { it.icon == 0 }
-                        .map { installedAppInfoList.remove(it) }
-            }
+            installedAppInfoList = appListActivity.packageManager.getInstalledApplications(PackageManager.GET_ACTIVITIES)
+            installedAppInfoList
+                    .filter { it.icon == 0 }
+                    .forEach { installedAppInfoList.remove(it) }
 
             it.onNext(installedAppInfoList)
             it.onComplete()
         }, BackpressureStrategy.BUFFER)
-                //.sorted()
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.newThread())
                 .subscribe({
-                    Flowable.fromIterable(installedAppInfoList)
-                            .filter { installedAppInfoList.indexOf(it) in appListStartIdx until appListStartIdx + MAX_LOADING_APP_LENGTH }
-
-                            /*.buffer(Flowable.fromIterable(installedAppInfoList)
-                                    .filter { (installedAppInfoList.indexOf(it) >= appListStartIdx + MAX_LOADING_APP_LENGTH - 1) or
-                                            (installedAppInfoList.indexOf(it) >= installedAppInfoList.lastIndex) }
-                                    .map { App(it.packageName, it.icon, appListActivity.packageManager.getApplicationLabel(it).toString(),
-                                            appsLocalDataSource.loadApp(it.packageName)?.locked ?: false) }
-                                    .take(1))*/
-                            .window(25)
-
-                            .map { appInfo -> App(
-                                    appInfo.packageName,
-                                    appInfo.icon,
-                                    appListActivity.packageManager.getApplicationLabel(appInfo).toString(),
-                                    appsLocalDataSource.loadApp(appInfo.packageName)?.locked ?: false)
+                    /*Flowable.fromIterable(it)
+                            .filter { it.icon != 0 }
+                            .map {
+                                App(it.packageName,
+                                        it.icon,
+                                        appListActivity.packageManager.getApplicationLabel(it).toString(),
+                                        appsLocalDataSource.loadApp(it.packageName)?.locked ?: false)
                             }
+                            .observeOn(Schedulers.io())
+                            .subscribeOn(Schedulers.newThread())
+                            .subscribe ({ installedAppList2.add(it)  }, {}, { Log.e("!!!!!!!!!!!!!!!!!!", "complete") })*/
 
-                            //.filter { installedAppInfoList.indexOf(it) in appListStartIdx until appListStartIdx + MAX_LOADING_APP_LENGTH }
-                            .doOnSubscribe {
-                                appListStartIdx += MAX_LOADING_APP_LENGTH
-                                Log.e("!!!!!!!!!!!!!!!!!", "$appListStartIdx")
-                            }
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .onBackpressureBuffer()
-                            .subscribe(
-                                    { app ->
-                                        Log.e("!!!!!!!!!!!!!!!", "${app.size}")
-                                        appListActivity.showProgressBar()
-                                        appListActivity.appListAdapter.addApps(app)
-                                    },
-                                    {
-                                        throwable -> Log.e("$javaClass (getInstalledAppsByParts)", "${throwable.printStackTrace()}")
-                                        appListActivity.hideProgressBar()
-                                    },
-                                    {
-                                        appListActivity.appListAdapter.notifyDataSetChanged()
-                                        appListActivity.hideProgressBar()
-                                    },
-                                    {
-                                        subscription -> subscription.request(Long.MAX_VALUE)
-                                    })
+
+                    loadApps(0)
                 })
+
+    fun loadApps(page: Long): Disposable {
+        appListActivity.isLoading = true
+
+        return Flowable.fromIterable(installedAppInfoList)
+                .map({
+                    App(it.packageName,
+                            it.icon,
+                            appListActivity.packageManager.getApplicationLabel(it).toString(),
+                            appsLocalDataSource.loadApp(it.packageName)?.locked ?: false)
+                })
+                .buffer(MAX_LOADING_APP_LENGTH)
+                .elementAt(page)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                //.onBackpressureBuffer()
+                .subscribe(
+                        { app ->
+                            //Log.e("!!!!!!!!!!!!!!!", "$page")
+                            //appListActivity.showProgressBar()
+                            appListActivity.appListAdapter.addApps(app)
+
+                            appListActivity.appListAdapter.notifyItemRangeInserted(MAX_LOADING_APP_LENGTH * (page.toInt() + 1), MAX_LOADING_APP_LENGTH)
+                            appListActivity.hideProgressBar()
+                            appListActivity.isLoading = false
+
+                            app.forEach { Log.e("!!!!!!!!!!!!!!!!", "android.resource://${it.packageName}/${it.iconId}") }
+                        },
+                        {
+                            throwable ->
+                            Log.e("$javaClass (getInstalledAppsByParts)", "${throwable.printStackTrace()}")
+                            appListActivity.hideProgressBar()
+                            appListActivity.isLoading = false
+                        },
+                        {
+                            //appListActivity.appListAdapter.notifyDataSetChanged()
+                            appListActivity.hideProgressBar()
+                            appListActivity.isLoading = false
+
+                            Log.e("!!!!!!!!!!!!!!!!!!", "complete")
+                        }/*,
+                        {
+                            subscription -> subscription.request(Long.MAX_VALUE)
+                        }*/)
+    }
 
     override fun getInstalledAppsByParts(startIndex: Int) = getInstalledAppsDispoable(startIndex)
 

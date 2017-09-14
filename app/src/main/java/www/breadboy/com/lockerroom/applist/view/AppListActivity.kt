@@ -7,6 +7,7 @@ import android.support.design.widget.Snackbar
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.StaggeredGridLayoutManager
 import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -54,12 +55,12 @@ class AppListActivity : AppListContract.View() {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_SHORT)
                     .setAction("Action", null).show()
         }
+
+        appListPresenter.start()
     }
 
     override fun onResume() {
         super.onResume()
-
-        appListPresenter.start()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -88,32 +89,65 @@ class AppListActivity : AppListContract.View() {
                 .injectMembers(this)
     }
 
+    var isLoading = false
     override fun setupRecyclerView() {
+        var page: Long = 1
+
+
         recyclerview_app_list_activity.apply {
             adapter = appListAdapter
             layoutManager = appListStaggeredGridLayoutManager
+            //if (childCount == 0) appListPresenter.loadApps(page++)
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
 
-                    appListStaggeredGridLayoutManager.apply {
-                        if (childCount + findFirstVisibleItemPositions(null)[0] + ADJUSTED_VALUE >= itemCount) {
-                            //appListPresenter.getInstalledAppsByParts(appListStartIdx)
-                            appListPresenter.installedAppInfomations()
-                                    .let {
-                                        if (itemCount == installedAppList.size) it.dispose()
-                                        disposables.add(it)
-                                    }
-                        }
-                    }
+                    if (!isLoading)
+                        appListStaggeredGridLayoutManager.apply {
+                            /*if (itemCount > previousTotalCount) {
+                                previousTotalCount = itemCount
 
+
+                            }*/
+                            /*Log.e("!!!!!!!!!!!!!!!!!!!!!", "${itemCount}        ${findLastVisibleItemPositions(null).last() + 10}")
+                            if (itemCount <= findLastVisibleItemPositions(null).last() + 5) {
+                                Log.e("!!!!!!!!!!!!!!!!!!!!!", "${itemCount}        ${findLastVisibleItemPositions(null).last() + 10}")
+                                //showProgressBar()
+
+                                appListPresenter.loadApps(page++)
+                                        .let {
+                                            if (itemCount == installedAppList.size) it.dispose()
+                                            disposables.add(it)
+                                        }
+                            }*/
+
+                            /*Log.e("!!!!!!!!!!!!!!", "$isLoading        " +
+                                    "${childCount + appListStaggeredGridLayoutManager.findFirstVisibleItemPositions(null).first() + 5}          " +
+                                    "${appListStaggeredGridLayoutManager.itemCount}")*/
+
+                            if (childCount + findFirstVisibleItemPositions(null).first() + 5 >= itemCount) {
+                                showProgressBar()
+
+                                //appListPresenter.getInstalledAppsByParts(appListStartIdx)
+                                appListPresenter.loadApps(page++)
+                                        .let {
+                                            if (itemCount == installedAppList.size) it.dispose()
+                                            disposables.add(it)
+                                        }
+                            }
+                        }
+/*else Log.e("!!!!!!!!!!!!!!", "$isLoading        " +
+        "${childCount + appListStaggeredGridLayoutManager.findFirstVisibleItemPositions(null).first() + 5}          " +
+        "${appListStaggeredGridLayoutManager.itemCount}")*/
                 }
             })
         }
     }
 
     override fun showProgressBar() {
-        progressbar_app_list_activity.visibility = View.VISIBLE
+        if (progressbar_app_list_activity.visibility != View.VISIBLE) {
+            progressbar_app_list_activity.visibility = View.VISIBLE
+        }
     }
 
     override fun hideProgressBar() {
