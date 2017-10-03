@@ -25,23 +25,17 @@ class AppListModule(var appListActivity: AppListActivity) : BaseModule<AppListAc
 
     @ActivityScope
     @Provides
-    fun provideAppListPresenter(appListActivity: AppListActivity,
-                                installedAppList: MutableList<ApplicationInfo>,
-                                appsLocalDataSource: AppsLocalDataSource) = AppListPresenter(appListActivity, installedAppList, appsLocalDataSource)
+    fun provideAppListPresenter(appListActivity: AppListActivity, appsLocalDataSource: AppsLocalDataSource)
+            = AppListPresenter(appListActivity, appsLocalDataSource)
 
     @ActivityScope
     @Provides
-    fun provideAppListAdapter(appListActivity: AppListActivity,
-                              appListPresenter: AppListPresenter) = AppListAdapter(appListActivity, appListPresenter)
+    fun provideAppListAdapter(appListActivity: AppListActivity, appListPresenter: AppListPresenter)
+            = AppListAdapter(appListActivity, appListPresenter)
 
     @ActivityScope
     @Provides
     fun provideAppListStaggeredGridLayoutManager() = StaggeredGridLayoutManager(3, 1)
-
-    @ActivityScope
-    @Provides
-    fun provideInstalledAppList(appListActivity: AppListActivity) =
-            appListActivity.packageManager.getInstalledApplications(PackageManager.GET_ACTIVITIES)
 
     @ActivityScope
     @Provides

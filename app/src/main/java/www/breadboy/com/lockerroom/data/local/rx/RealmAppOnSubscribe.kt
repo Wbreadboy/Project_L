@@ -17,7 +17,7 @@ abstract class RealmAppOnSubscribe<T> : FlowableOnSubscribe<T> {
         var realmObj: T? = null
 
         // TODO : Injection 필요 - RealmAppModule
-        Realm.getInstance(LockerRoomApplication.realmAppConfig). let {
+        Realm.getInstance(LockerRoomApplication.realmAppConfig).let {
             // TODO : in flowable
             emitter.setCancellable {
 

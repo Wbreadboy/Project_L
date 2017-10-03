@@ -1,13 +1,9 @@
 package www.breadboy.com.lockerroom.application
 
-import android.animation.Keyframe
 import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.provider.Settings
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
-import android.util.Base64
 import android.util.Log
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -15,13 +11,6 @@ import io.realm.log.RealmLog
 import www.breadboy.com.lockerroom.base.ComponentBuilder
 import www.breadboy.com.lockerroom.base.WhichSubcomponentBuilders
 import www.breadboy.com.lockerroom.data.local.realm.RealmAppModule
-import java.security.KeyFactory
-import java.security.KeyPairGenerator
-import java.security.KeyStore
-import java.security.Signature
-import java.util.*
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
 import javax.inject.Inject
 import javax.inject.Provider
 

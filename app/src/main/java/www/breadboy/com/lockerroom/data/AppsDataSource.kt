@@ -1,5 +1,6 @@
 package www.breadboy.com.lockerroom.data
 
+import android.content.Context
 import io.reactivex.Flowable
 import www.breadboy.com.lockerroom.data.local.realm.RealmApp
 
@@ -9,7 +10,7 @@ import www.breadboy.com.lockerroom.data.local.realm.RealmApp
 interface AppsDataSource {
 
     fun loadApp(appPackageName: String): App?
-    fun loadApps(): Flowable<*>
+    fun loadApps(context: Context): Flowable<*>
 
     fun saveApp(app: App)
     fun saveApps(appList: List<App>)

@@ -36,7 +36,10 @@ constructor(val appListActivity: AppListActivity,
 
     fun addApp(app: App) = mutableAppList.add(app)
 
-    fun addApps(apps: List<App>) = mutableAppList.addAll(apps)
+    fun addApps(apps: List<App>) {
+        mutableAppList.addAll(apps)
+        notifyItemRangeInserted(mutableAppList.size, apps.size)
+    }
 
     fun removeApp(app: App) = mutableAppList.remove(app)
 

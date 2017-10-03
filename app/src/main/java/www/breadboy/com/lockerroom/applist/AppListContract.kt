@@ -22,11 +22,7 @@ interface AppListContract {
     }
 
     interface Presenter : BasePresenter {
-        fun getInstalledAppsByParts(startIndex: Int): Disposable
-
-        fun getInstalledAppsFlowable(startIndex: Int): Flowable<*>
-
-        fun getInstalledAppsDispoable(startIndex: Int): Disposable
+        fun loadInstalledApps(page: Long): Disposable
 
         fun onInstalledAppClick(holder: AppListViewHolder?, position: Int, app: App): Disposable
     }
